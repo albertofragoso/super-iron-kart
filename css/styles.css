@@ -1,0 +1,55 @@
+@font-face {
+  font-family: 'mario_kart_dsregular';
+  src: url('../assets/font/mario-kart-ds-webfont.woff2') format('woff2'),
+       url('../assets/font/mario-kart-ds-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  font-family: 'mario_kart_dsregular';
+  margin: 0;
+  padding: 0;
+  background: #141414;
+  color: #fff;
+  text-align: center;
+}
+
+.container {
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#board-1, #board-2 {
+  border: 2px solid #fff;
+  margin: 5px 0;
+  box-sizing: border-box;
+}
+
+#player1, #player2 {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+#player2 {
+  display: none;
+}
+
+figure {
+  width: 200px;
+}
+
+.select-one {
+  /* flex-grow:  */
+}
+
+.select-two {
+  /* display: none; */
+}
