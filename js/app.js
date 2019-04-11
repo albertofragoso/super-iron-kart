@@ -484,7 +484,7 @@ function checkCollition() {
 
   blocks2.forEach(block => {
     if(character2.isTouching(block)){
-      const randomItem = Math.floor(Math.random() * 3) + 1
+      const randomItem = Math.floor(Math.random() * 2) + 1
       switch(randomItem) {
         case 1:
           character2.item = 'coin'
@@ -525,16 +525,14 @@ document.addEventListener('keydown', e => {
           character1.item = false
           break;
         case 'coin':
-          console.log('I have used a coin')
           if(score2 > 0) score2 -= 1000
           character1.item = false
           break;
         case 'mushroom':
-          console.log('I have used a mushroom')
           score1 += 1000
           
           let speeder = setInterval(() => {
-            character1.x += 2
+            if(character1.x + character1.width < canvas1.width) character1.x += 2
             if(frames1 % 120 === 0) clearInterval(speeder)
           }, 0)
           
@@ -567,7 +565,7 @@ document.addEventListener('keydown', e => {
           score2 += 1000
           
           let speeder = setInterval(() => {
-            character2.x += 2
+            if(character2.x + character2.width < canvas2.width) character2.x += 2
             if(frames2 % 120 === 0) clearInterval(speeder)
           }, 0)
           
