@@ -18,6 +18,7 @@ let isThrowing1 = false
 let isThrowing2 = false
 let items1 = []
 let items2 = []
+const keys = []
 
 const winner = 100
 const coin = new Image()
@@ -139,10 +140,10 @@ class Character {
             (this.y + this.height + 40 > item.y + 40)
   }
   speedUp() {
-    if(this.x < canvas2.width - this.width) this.x += 5
+    if(this.x < canvas2.width - this.width) this.x += 2
   }
   speedDown() {
-    if(this.x > 0) this.x -= 15
+    if(this.x > 0) this.x -= 5
   }
   jump() {
     this.jumping.play()
@@ -339,7 +340,7 @@ function update() {
   if(!isCrashing2) character2.draw()
   else character2.drawSprite(false)
 
-  
+  keyListener()
   checkCollition()
   printScore()
   printItemBoard()
@@ -539,86 +540,78 @@ function throwItem() {
   isThrowing1 = false
 }
 
+function keyListener() {
+  if(keys[40]) { // arrow down
+    switch(character1.item) {
+      case 'shell':
+        isThrowing1 = true
+        character1.item = false
+        break;
+      case 'coin':
+        if(score2 > 0) score2 -= 1000
+        character1.coin.play()
+        character1.item = false
+        break;
+      case 'mushroom':
+        score1 += 1000
+        character1.boost.play()
+        let speeder = setInterval(() => {
+          if(character1.x <  canvas1.width - character1.width - 1) character1.x += 5
+          if(frames1 % 120 === 0) clearInterval(speeder)
+        }, 0)
+        
+        character1.item = false
+        break;
+      default:
+        break;
+    }
+  }
+  if(keys[38]) character1.jump() //arrow up
+  if(keys[39]) character1.speedUp() //arrow left
+  if(keys[37]) character1.speedDown() //arrow rigth
+  if(keys[88]) { // X
+    switch(character2.item) {
+      case 'shell':
+        isThrowing2 = true
+        character2.item = false
+        break;
+      case 'coin':
+        if(score1 > 0) score1 -= 1000
+        character2.coin.play()
+        character2.item = false
+        break;
+      case 'mushroom':
+        score2 += 1000
+        character2.boost.play()
+        
+        let speeder = setInterval(() => {
+          if(character2.x <  canvas2.width - character2.width - 1) character2.x += 5
+          if(frames2 % 120 === 0) clearInterval(speeder)
+        }, 0)
+        
+        character2.item = false
+        break;
+      default:
+        break;
+    }
+  }
+  if(keys[83]) character2.jump() // S
+  if(keys[67]) character2.speedUp() // C
+  if(keys[90]) character2.speedDown() // Z
+}
+
 // Listeners
 document.addEventListener('keydown', e => {
+  keys[e.keyCode] = true
   switch(e.keyCode) {
     case 13:
       startGame()
       break;
-    case 40: // arrow down
-      switch(character1.item) {
-        case 'shell':
-          isThrowing1 = true
-          character1.item = false
-          break;
-        case 'coin':
-          if(score2 > 0) score2 -= 1000
-          character1.coin.play()
-          character1.item = false
-          break;
-        case 'mushroom':
-          score1 += 1000
-          character1.boost.play()
-          let speeder = setInterval(() => {
-            if(character1.x <  canvas1.width - character1.width - 1) {
-              character1.x += 2
-            }
-            if(frames1 % 120 === 0) clearInterval(speeder)
-          }, 0)
-          
-          character1.item = false
-          break;
-        default:
-          break;
-      }
-      break;
-    case 38: //arrow up
-      character1.jump()
-      break;
-    case 39: // arrow rigth
-      character1.speedUp()
-      break;
-    case 37: // arrow left
-      character1.speedDown()
-      break;
-    case 88: // X
-      switch(character2.item) {
-        case 'shell':
-          isThrowing2 = true
-          character2.item = false
-          break;
-        case 'coin':
-          if(score1 > 0) score1 -= 1000
-          character2.coin.play()
-          character2.item = false
-          break;
-        case 'mushroom':
-          score2 += 1000
-          character2.boost.play()
-          
-          let speeder = setInterval(() => {
-            if(character2.x <  canvas2.width - character2.width - 1) character2.x += 2
-            if(frames2 % 120 === 0) clearInterval(speeder)
-          }, 0)
-          
-          character2.item = false
-          break;
-        default:
-          break;
-      }
-      break;
-    case 83: //S
-      character2.jump()
-      break;
-    case 67: // C
-      character2.speedUp()
-      break;
-    case 90: // Z
-      character2.speedDown()
-      break;
-    default:
-      break;
   }
+})
+
+document.body.addEventListener('keyup', e => {
+  keys[e.keyCode] = false
 })
 
 // Disable scroll keys
