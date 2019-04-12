@@ -71,6 +71,24 @@ class Character {
     this.sprite.src = './assets/sprites/' + player +'_sprite.png'
     this.sx = 0
     this.sy = 0
+    this.hit = new Audio()
+    this.hit.src = './assets/music/hit.mp3'
+    this.hit.loop = false
+    this.jumping = new Audio()
+    this.jumping.src = './assets/music/jump.mp3'
+    this.jumping.loop = false
+    this.iteming = new Audio()
+    this.iteming.src = './assets/music/item.mp3'
+    this.iteming.loop = false
+    this.boost = new Audio()
+    this.boost.src = './assets/music/boost.mp3'
+    this.boost.loop = false
+    this.coin = new Audio()
+    this.coin.src = './assets/music/coin.mp3'
+    this.coin.loop = false
+    this.finish = new Audio()
+    this.finish.src = './assets/music/finish.mp3'
+    this.finish.loop = false
   }
   draw() {
     if(this.x < canvas1.width - this.width) this.x++
@@ -127,6 +145,7 @@ class Character {
     if(this.x > 0) this.x -= 15
   }
   jump() {
+    this.jumping.play()
     if(this.y > canvas1.height - this.height - 1) this.y -= 100
   }
 }
@@ -355,6 +374,8 @@ function startGame() {
 function checkWinner() {
   if(Math.round((score1 / 1000) * 10) >= winner) {
     console.log('Winner player 1')
+    board1.audio.pause()
+    character1.finish.play()
     ctx1.font = 'bold 33px serif';
     ctx1.fillText('You won!', canvas1.width / 2 - 100, canvas1.height / 2)
     clearInterval(interval1)
@@ -362,6 +383,8 @@ function checkWinner() {
   }
   if(Math.round((score2 / 1000) * 10) >= winner) {
     console.log('Winner player 2')
+    board1.audio.pause()
+    character2.finish.play()
     ctx2.font = 'bold 33px serif';
     ctx2.fillText('You won!', canvas2.width / 2 - 100, canvas2.height / 2)
     clearInterval(interval1)
@@ -447,18 +470,21 @@ function checkCollition() {
   bananas1.forEach(banana => {
     if(character1.isTouching(banana)){
       if(score1 > 0) score1 -= 50
+      character1.hit.play()
       isCrashing1 = true
     }
   })
   bananas2.forEach(banana => {
     if(character2.isTouching(banana)){
       if(score2 > 0) score2 -= 50
+      character2.hit.play()
       isCrashing2 = true
     }
   })
 
   for(let i = 0; i < blocks1.length; i++) {
     if(character1.isTouching(blocks1[i])){
+      character1.iteming.play()
       const randomItem = Math.floor(Math.random() * 2) + 1
       switch(randomItem) {
         case 1:
@@ -484,6 +510,7 @@ function checkCollition() {
 
   blocks2.forEach(block => {
     if(character2.isTouching(block)){
+      character2.iteming.play()
       const randomItem = Math.floor(Math.random() * 2) + 1
       switch(randomItem) {
         case 1:
@@ -526,13 +553,16 @@ document.addEventListener('keydown', e => {
           break;
         case 'coin':
           if(score2 > 0) score2 -= 1000
+          character1.coin.play()
           character1.item = false
           break;
         case 'mushroom':
           score1 += 1000
-          
+          character1.boost.play()
           let speeder = setInterval(() => {
-            if(character1.x + character1.width < canvas1.width) character1.x += 2
+            if(character1.x <  canvas1.width - character1.width - 1) {
+              character1.x += 2
+            }
             if(frames1 % 120 === 0) clearInterval(speeder)
           }, 0)
           
@@ -559,13 +589,15 @@ document.addEventListener('keydown', e => {
           break;
         case 'coin':
           if(score1 > 0) score1 -= 1000
+          character2.coin.play()
           character2.item = false
           break;
         case 'mushroom':
           score2 += 1000
+          character2.boost.play()
           
           let speeder = setInterval(() => {
-            if(character2.x + character2.width < canvas2.width) character2.x += 2
+            if(character2.x <  canvas2.width - character2.width - 1) character2.x += 2
             if(frames2 % 120 === 0) clearInterval(speeder)
           }, 0)
           
