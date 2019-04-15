@@ -491,7 +491,7 @@ function checkCollition() {
   for(let i = 0; i < blocks1.length; i++) {
     if(character1.isTouching(blocks1[i])){
       character1.iteming.play()
-      const randomItem = Math.floor(Math.random() * 2) + 1
+      const randomItem = Math.floor(Math.random() * 3) + 1
       switch(randomItem) {
         case 1:
           character1.item = 'coin'
@@ -543,14 +543,14 @@ function throwItem(x, where) {
     if(where) { //Threw player 1
       if(character2.isTouching(shell) && shell.where) {
         character2.hit.play()
-        if(score2 > 0) score2 -= 1000
+        score2 -= 1000
         isCrashing2 = true 
       }
     }
     else { //Threw player 2
       if(character1.isTouching(shell) && shell.where) {
         character1.hit.play()
-        if(score1 > 0) score1 -= 1000
+        score1 -= 1000
         isCrashing1 = true 
       }
     }
