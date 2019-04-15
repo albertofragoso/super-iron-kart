@@ -16,8 +16,8 @@ let isChoosing1 = false
 let isChoosing2 = false
 let isThrowing1 = false
 let isThrowing2 = false
-let items1 = []
-let items2 = []
+/*let items1 = []
+let items2 = []*/
 const keys = []
 
 const winner = 100
@@ -30,7 +30,7 @@ const ctx1 = canvas1.getContext('2d')
 const canvas2 = document.getElementById('board-2')
 const ctx2 = canvas2.getContext('2d')
 
-//Clases
+//Classes
 class Board {
   constructor(img, type) {
     this.x = 0,
@@ -192,36 +192,39 @@ class Block {
 }
 
 class Item {
-  constructor(type) {
-    this.x = 0
-    this.y = canvas1.height - 100
+  constructor(x, type) {
+    this.x = x
+    this.y = canvas1.height - 40
     this.width = 40
     this.height = 40
-    this.spriteGreen = new Image()
-    this.spriteGreen.src = './assets/sprites/shell_sprite.png'
-    this.sx = 0
-    this.sy = 0
+    this.img = new Image()
+    this.img.src = './assets/sprites/shell.png'
     this.type = type
+    this.where = false
+    this.audio = new Audio()
+    this.audio.src = './assets/music/throw.mp3'
+    this.audio.loop = false
   }
   draw() {
     if(this.type) {
-      //ctx1.drawImage(this.spriteGreen, this.x, this.y, this.width, this.height)
-      ctx1.drawImage(
-        this.spriteGreen,
-        this.sx,
-        this.sy,
-        31,
-        31,
-        100,
-        100,
-        this.width,
-        this.height
-      )
-      this.sx += 31
+      if(this.x < canvas1.width + this.width && !this.where) {
+        ctx1.drawImage(this.img, this.x, this.y, this.width, this.height)
+        this.x += 10
+      } else {
+        this.where = true
+        ctx2.drawImage(this.img, this.x, this.y, this.width, this.height)    
+        this.x -= 10
+      }
     } else {
-      ctx2.drawImage(this.img, this.x, this.y, this.width, this.height)
+      if(this.x < canvas2.width + this.width && !this.where) {
+        ctx2.drawImage(this.img, this.x, this.y, this.width, this.height)
+        this.x += 10
+      } else {
+        this.where = true
+        ctx1.drawImage(this.img, this.x, this.y, this.width, this.height)    
+        this.x -= 10
+      }
     }
-    this.x++
   }
 }
 
@@ -312,7 +315,7 @@ class ItemBoard {
   }
 }
 
-// Definiciones
+// Definitions
 const random_stage = Math.random() >= 0.5;
 
 const board1 = new Board((random_stage) ? './assets/backgrounds/night.png' : './assets/backgrounds/day.png', true)
@@ -324,7 +327,7 @@ const character2 = new Character(playerTwo, false)
 const itemBoard1 = new ItemBoard(true)
 const itemBoard2 = new ItemBoard(false)
 
-// Flujo principal
+// Main flow
 function update() {
   frames1++
   frames2++
@@ -352,8 +355,8 @@ function update() {
   removeBlocks()
   checkWinner()
 
-  if(isThrowing1) throwItem()
-  if(isThrowing2) throwItem()
+  if(isThrowing1) throwItem(character1.x + character1.width, true)
+  if(isThrowing2) throwItem(character2.x+ character2.width, false)
 
   if(character1.y >= canvas1.height - character1.height) {
     character1.y = canvas1.height - character1.height
@@ -372,6 +375,7 @@ function startGame() {
   interval2 = setInterval(update, 1000 / 60)
 }
 
+// Helpers
 function checkWinner() {
   if(Math.round((score1 / 1000) * 10) >= winner) {
     console.log('Winner player 1')
@@ -393,7 +397,6 @@ function checkWinner() {
   }
 }
 
-// Helpers
 function generateBananas() {
   const random1 = Math.floor(Math.random() * 50);
   const random2 = Math.floor(Math.random() * 50);
@@ -439,6 +442,8 @@ function removeBlocks() {
 }
 
 function printScore() {
+  if(score1 < 0) score1 = 0
+  if(score2 < 0) score2 = 0
   ctx1.drawImage(coin, 5, 20, 20, 20)
   ctx1.font = 'bold 33px serif';
   ctx1.fillStyle = (random_stage) ? 'white' : 'black'
@@ -470,14 +475,14 @@ function drawBlocks() {
 function checkCollition() {
   bananas1.forEach(banana => {
     if(character1.isTouching(banana)){
-      if(score1 > 0) score1 -= 50
+      score1 -= 50
       character1.hit.play()
       isCrashing1 = true
     }
   })
   bananas2.forEach(banana => {
     if(character2.isTouching(banana)){
-      if(score2 > 0) score2 -= 50
+      score2 -= 50
       character2.hit.play()
       isCrashing2 = true
     }
@@ -498,10 +503,7 @@ function checkCollition() {
           break;
         case 3:
           character1.item = 'shell'
-          let shell = new Item(true)
-          items1.push(shell)
           isChoosing1 = true
-          return
           break;
         default:
           break;
@@ -524,10 +526,7 @@ function checkCollition() {
           break;
         case 3:
           character2.item = 'shell'
-          let shell = new Item(true)
-          items2.push(shell)
           isChoosing2 = true
-          return
           break;
         default:
           break;
@@ -536,9 +535,31 @@ function checkCollition() {
   })
 }
 
-function throwItem() {
-  isThrowing1 = false
+function throwItem(x, where) {
+  let shell = new Item(x, where)
+  shell.audio.play()
+  let speeder = setInterval(() => {
+    shell.draw()
+    if(where) { //Threw player 1
+      if(character2.isTouching(shell) && shell.where) {
+        character2.hit.play()
+        if(score2 > 0) score2 -= 1000
+        isCrashing2 = true 
+      }
+    }
+    else { //Threw player 2
+      if(character1.isTouching(shell) && shell.where) {
+        character1.hit.play()
+        if(score1 > 0) score1 -= 1000
+        isCrashing1 = true 
+      }
+    }
+    if(shell.x < 0) clearInterval(speeder)
+  }, 0)
+  if(where) isThrowing1 = false
+  else isThrowing2 = false
 }
+
 
 function keyListener() {
   if(keys[40]) { // arrow down
@@ -548,12 +569,12 @@ function keyListener() {
         character1.item = false
         break;
       case 'coin':
-        if(score2 > 0) score2 -= 1000
+        score1 += 1000
         character1.coin.play()
         character1.item = false
         break;
       case 'mushroom':
-        score1 += 1000
+        score1 += 500
         character1.boost.play()
         let speeder = setInterval(() => {
           if(character1.x <  canvas1.width - character1.width - 1) character1.x += 5
@@ -576,12 +597,12 @@ function keyListener() {
         character2.item = false
         break;
       case 'coin':
-        if(score1 > 0) score1 -= 1000
+        score2 += 1000
         character2.coin.play()
         character2.item = false
         break;
       case 'mushroom':
-        score2 += 1000
+        score2 += 500
         character2.boost.play()
         
         let speeder = setInterval(() => {
