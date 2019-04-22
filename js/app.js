@@ -514,7 +514,7 @@ function checkCollition() {
   blocks2.forEach(block => {
     if(character2.isTouching(block)){
       character2.iteming.play()
-      const randomItem = Math.floor(Math.random() * 2) + 1
+      const randomItem = Math.floor(Math.random() * 3) + 1
       switch(randomItem) {
         case 1:
           character2.item = 'coin'
